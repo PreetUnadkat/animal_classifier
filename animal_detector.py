@@ -66,6 +66,7 @@ def main():
     prob = predict_animal(img_array)
 
     print(f"\nPrediction Probability: {prob:.3f}")
+    print(interpreter.get_output_details())
     if prob > 0.5:
         print("✅ Animal detected!")
     else:
