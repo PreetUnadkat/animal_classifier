@@ -28,7 +28,7 @@ def capture_photo(filename="capture.jpg"):
 
     print("📸 Capturing photo using libcamera-still...")
     # take photo (adjust resolution if needed)
-    os.system(f"libcamera-still -o {filename} --width 640 --height 480 --nopreview -t 1500")
+    os.system(f"rpicam-still -o {filename} --width 640 --height 480 --nopreview -t 1500")
 
     # wait briefly to ensure file is written
     if not os.path.exists(filename):
