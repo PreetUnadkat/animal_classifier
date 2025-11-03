@@ -1,10 +1,8 @@
 import numpy as np
-from picamera2 import Picamera2
 from PIL import Image
 import tflite_runtime.interpreter as tflite
 import time
 import os
-
 
 # ---------- MODEL SETUP ----------
 MODEL_PATH = "animal_detector.tflite"
@@ -14,36 +12,43 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-input_shape = input_details[0]['shape']  # e.g., (1, 96, 96, 3)
+input_shape = input_details[0]['shape']  # e.g. (1, 96, 96, 3)
 IMG_SIZE = (input_shape[2], input_shape[1])  # (width, height)
 
 
 # ---------- CAPTURE FUNCTION ----------
 def capture_photo(filename="capture.jpg"):
-    """Captures a photo using Raspberry Pi Camera and saves it."""
-    picam2 = Picamera2()
-    config = picam2.create_still_configuration(main={"size": (640, 480)})
-    picam2.configure(config)
-    picam2.start()
-    time.sleep(2)  # warm-up
-    picam2.capture_file(filename)
-    picam2.close()
+    """
+    Captures a photo using the Raspberry Pi camera via libcamera-still.
+    No Python camera libs required.
+    """
+    # remove old photo if any
+    if os.path.exists(filename):
+        os.remove(filename)
+
+    print("📸 Capturing photo using libcamera-still...")
+    # take photo (adjust resolution if needed)
+    os.system(f"libcamera-still -o {filename} --width 640 --height 480 --nopreview -t 1500")
+
+    # wait briefly to ensure file is written
+    if not os.path.exists(filename):
+        raise RuntimeError("Camera capture failed or image not saved.")
     return filename
 
 
 # ---------- PREPROCESSING ----------
 def preprocess_image(image_path):
-    """Loads image, resizes and normalizes for TFLite model."""
+    """Loads image, resizes, and normalizes for TFLite model."""
     image = Image.open(image_path).convert("RGB")
     image = image.resize(IMG_SIZE)
     img_array = np.asarray(image, dtype=np.float32) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)  # shape (1, H, W, 3)
+    img_array = np.expand_dims(img_array, axis=0)  # (1, H, W, 3)
     return img_array
 
 
 # ---------- PREDICTION ----------
 def predict_animal(image_array):
-    """Runs inference and returns probability and class."""
+    """Runs inference and returns probability."""
     interpreter.set_tensor(input_details[0]['index'], image_array)
     interpreter.invoke()
     output = interpreter.get_tensor(output_details[0]['index'])[0][0]
@@ -52,7 +57,6 @@ def predict_animal(image_array):
 
 # ---------- MAIN FUNCTION ----------
 def main():
-    print("📸 Capturing photo...")
     img_path = capture_photo()
 
     print("🔄 Preprocessing image...")
