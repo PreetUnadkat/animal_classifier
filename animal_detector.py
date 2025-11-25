@@ -5,7 +5,7 @@ import time
 import os
 
 # ---------- MODEL SETUP ----------
-MODEL_PATH = "animal_classifier.tflite"
+MODEL_PATH = "model_unquant.tflite"
 
 interpreter = tflite.Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
