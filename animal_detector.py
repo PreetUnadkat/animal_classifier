@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 # ==================== CONFIGURATION ====================
-MODEL_PATH = "quick.tflite"
+MODEL_PATH = "realfinal.tflite"
 CAPTURE_FILENAME = "capture.jpg"
 CAPTURE_WIDTH = 640
 CAPTURE_HEIGHT = 480
@@ -211,9 +211,10 @@ def interpret_results(output_probs, threshold=CONFIDENCE_THRESHOLD):
 
 # ==================== MAIN FUNCTION ====================
 def main():
+    print('Real final')
     """Main execution pipeline."""
     print("=" * 50)
-    print("🤖 Raspberry Pi Animal Classifier")
+    print("Raspberry Pi Animal Classifier")
     print("=" * 50)
     
     try:
@@ -247,7 +248,7 @@ def main():
         
         # Display results
         print("\n" + "=" * 50)
-        print("📊 RESULTS")
+        print("RESULTS")
         print("=" * 50)
         print(f"Animal probability:    {results['animal_probability']:.4f}")
         print(f"No-animal probability: {results['no_animal_probability']:.4f}")
@@ -256,20 +257,20 @@ def main():
         print()
         
         if results['is_animal']:
-            print("✅ ANIMAL DETECTED!")
+            print("NO ANIMAL DETECTED!")
         else:
-            print("❌ NO ANIMAL DETECTED")
+            print("ANIMAL DETECTED")
         
         print("=" * 50)
         
         return 0
         
     except KeyboardInterrupt:
-        print("\n\n⚠️  Interrupted by user")
+        print("\n\n  Interrupted by user")
         return 130
     
     except Exception as e:
-        print(f"\n\n❌ ERROR: {e}", file=sys.stderr)
+        print(f"\n\n ERROR: {e}", file=sys.stderr)
         return 1
 
 
