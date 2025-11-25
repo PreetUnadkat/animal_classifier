@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 # ==================== CONFIGURATION ====================
-MODEL_PATH = "finalnocapanidet.tflite"
+MODEL_PATH = "quick.tflite"
 CAPTURE_FILENAME = "capture.jpg"
 CAPTURE_WIDTH = 640
 CAPTURE_HEIGHT = 480
