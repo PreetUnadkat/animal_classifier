@@ -48,11 +48,10 @@ def preprocess_image(image_path):
 
 # ---------- PREDICTION ----------
 def predict_animal(image_array):
-    """Runs inference and returns probability."""
     interpreter.set_tensor(input_details[0]['index'], image_array)
     interpreter.invoke()
-    output = interpreter.get_tensor(output_details[0]['index'])[0][0]
-    return float(output)
+    output = interpreter.get_tensor(output_details[0]['index'])[0]
+    return output
 
 
 # ---------- MAIN FUNCTION ----------
@@ -63,12 +62,14 @@ def main():
     img_array = preprocess_image(img_path)
 
     print("🧠 Running model inference...")
-    prob = predict_animal(img_array)
+    probs = predict_animal(img_array)
+    print("Raw probs:", probs)
+    animal_prob = float(probs[1])   # class 1 = animal
+    noanimal_prob = float(probs[0]) # class 0 = no animal
 
-    print(f"\nPrediction Probability: {prob:.3f}")
-    print(interpreter.get_output_details())
-    print(np.min(img_array), np.max(img_array))
-    if prob > 0.5:
+    print("Prediction Probability:", animal_prob)
+
+    if animal_prob > 0.5:
         print("✅ Animal detected!")
     else:
         print("❌ No animal detected.")
