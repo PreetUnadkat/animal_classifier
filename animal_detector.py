@@ -41,7 +41,7 @@ def preprocess_image(image_path):
     """Loads image, resizes, and normalizes for TFLite model."""
     image = Image.open(image_path).convert("RGB")
     image = image.resize(IMG_SIZE)
-    img_array = np.asarray(image, dtype=np.float32)  # no division by 255
+    img_array = np.asarray(image, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)  # (1, H, W, 3)
     return img_array
 
