@@ -41,54 +41,83 @@ GPIO.setup(BUZZER_PIN, GPIO.OUT)
 # ULTRASONIC MEASUREMENT
 # ============================================================
 
+
 def measure_distance(trig, echo):
-    """Return distance in meters. Returns None on timeout."""
-    # Send trigger pulse
-    GPIO.output(trig, False)
-    time.sleep(0.000002)  # 2µs to settle
+    """
+    Return distance in meters. 
+    Returns None if sensor times out or fails.
+    """
+    # Trigger pulse
     GPIO.output(trig, True)
-    time.sleep(0.00001)   # 10µs pulse
+    time.sleep(0.00001) # 10us pulse
     GPIO.output(trig, False)
 
-    start_time = time.time()
-    timeout_start = start_time
-
-    # Wait for echo to go high
+    start_timeout = time.monotonic()
+    
+    # Wait for Echo Rise
     while GPIO.input(echo) == 0:
-        start_time = time.time()
-        if start_time - timeout_start > ECHO_TIMEOUT:
+        if time.monotonic() - start_timeout > ECHO_TIMEOUT:
             return None
 
-    # Wait for echo to go low
-    stop_time = time.time()
+    t0 = time.monotonic()
+    
+    # Wait for Echo Fall
     while GPIO.input(echo) == 1:
-        stop_time = time.time()
-        if stop_time - start_time > ECHO_TIMEOUT:
+        if time.monotonic() - t0 > ECHO_TIMEOUT:
             return None
 
-    duration = stop_time - start_time
-    distance = (duration * 343.0) / 2.0  # speed of sound 343 m/s
+    t1 = time.monotonic()
+
+    # Calculate distance
+    duration = t1 - t0
+    distance = (duration * 343.0) / 2.0
     return distance
 
-
-# ============================================================
-# SPEED MEASUREMENT
-# ============================================================
-
-def measure_speed(trigcar, echocar, trigani, echoani,delay): # delay is 900 ms
-
-    caroridis=measure_distance(trigcar, echocar)
-    anioridis=measure_distance(trigani, echoani)
-
+def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
+    """
+    Measures speed for both Car and Animal simultaneously.
+    Returns: (car_speed, animal_speed, car_dist, animal_dist)
+    """
+    # 1. Take Initial Measurements
+    dist_car_1 = measure_distance(trig_car, echo_car)
+    dist_ani_1 = measure_distance(trig_ani, echo_ani)
+    time_1 = time.monotonic()
+    GPIO.output(LED_PIN, True)
+    GPIO.output(BUZZER_PIN, True)
     time.sleep(delay)
+    GPIO.output(LED_PIN, False)
+    GPIO.output(BUZZER_PIN, False)
 
-    car_distance=measure_distance(trigcar, echocar)
-    animal_distance=measure_distance(trigani, echoani)
+    # Wait for the interval
+    # time.sleep(delay)
 
-    car_speed=(caroridis-car_distance)/delay
-    animal_speed=(anioridis-animal_distance)/delay
+    # 2. Take Final Measurements
+    dist_car_2 = measure_distance(trig_car, echo_car)
+    dist_ani_2 = measure_distance(trig_ani, echo_ani)
+    time_2 = time.monotonic()
 
-    return car_speed, animal_speed, car_distance, animal_distance
+    # Calculate actual time delta (more accurate than relying on sleep)
+    actual_dt = (time_2 - time_1) 
+
+    # --- CALCULATE CAR SPEED ---
+    if dist_car_1 is not None and dist_car_2 is not None:
+        # Positive speed = approaching, Negative = moving away
+        car_speed = (dist_car_1 - dist_car_2) / actual_dt
+        final_car_dist = dist_car_2
+    else:
+        car_speed = 0.0
+        final_car_dist = dist_car_2 if dist_car_2 is not None else -1
+
+    # --- CALCULATE ANIMAL SPEED ---
+    if dist_ani_1 is not None and dist_ani_2 is not None:
+        ani_speed = (dist_ani_1 - dist_ani_2) / actual_dt
+        final_ani_dist = dist_ani_2
+    else:
+        ani_speed = 0.0
+        final_ani_dist = dist_ani_2 if dist_ani_2 is not None else -1
+
+    print(dist_ani_1, dist_ani_2, actual_dt,time_1,time_2)
+    return car_speed, ani_speed, final_car_dist, final_ani_dist
 
     """
     Returns speed in m/s based on multiple distance samples.
@@ -189,7 +218,7 @@ try:
             # time.sleep(0.5)
             # continue
 
-        car_speed, animal_speed, car_distance, animal_distance = measure_speed(USS2_TRIG, USS2_ECHO,USS1_TRIG,USS1_ECHO,0.9)
+        car_speed, animal_speed, car_distance, animal_distance = measure_speed_dual(USS2_TRIG, USS2_ECHO,USS1_TRIG,USS1_ECHO,0.9)
         time_animal = (animal_distance - 0.06) / animal_speed
         print(
             f"Animal: distance={animal_distance:.2f} m, "
@@ -200,11 +229,6 @@ try:
         # ===================== CAR (USS2) =====================
         # car_speed, car_distance = measure_speed(USS2_TRIG, USS2_ECHO)
 
-        if car_distance is None:
-            print("Car speed/distance could not be measured.")
-            time.sleep(0.2)
-            continue
-
         time_car = car_distance / car_speed
         print(
             f"Car: distance={car_distance:.2f} m, "
@@ -214,7 +238,7 @@ try:
 
         # ===================== CRASH PREDICTION =====================
         delta_t = abs(time_animal - time_car)
-        print(f"Δt = |t_animal - t_car| = {delta_t:.2f} s")
+        print(f"del t = |t_animal - t_car| = {delta_t:.2f} s")
 
         if delta_t < CRITICAL_TIME_DIFF:
             alert()
