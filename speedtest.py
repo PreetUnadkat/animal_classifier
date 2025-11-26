@@ -38,92 +38,57 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.setup(BUZZER_PIN, GPIO.OUT)
 
 
+
 def measure_distance(trig, echo):
-    """Best-possible HC-SR04 distance measurement (meters)."""
+    """Return distance in meters. Returns None on timeout."""
+    # Send trigger pulse
     GPIO.output(trig, False)
-    time.sleep(0.000002)
+    time.sleep(0.000002)  # 2µs to settle
     GPIO.output(trig, True)
-    time.sleep(0.00001)
+    time.sleep(0.00001)   # 10µs pulse
     GPIO.output(trig, False)
 
-    start = time.monotonic()
-    timeout = start + ECHO_TIMEOUT
+    start_time = time.time()
+    timeout_start = start_time
 
-    # Wait for echo HIGH
+    # Wait for echo to go high
     while GPIO.input(echo) == 0:
-        if time.monotonic() > timeout:
+        start_time = time.time()
+        if start_time - timeout_start > ECHO_TIMEOUT:
             return None
 
-    t0 = time.monotonic()
-
-    # Wait for echo LOW
+    # Wait for echo to go low
+    stop_time = time.time()
     while GPIO.input(echo) == 1:
-        if time.monotonic() > timeout:
+        stop_time = time.time()
+        if stop_time - start_time > ECHO_TIMEOUT:
             return None
 
-    t1 = time.monotonic()
+    duration = stop_time - start_time
+    distance = (duration * 343.0) / 2.0  # speed of sound 343 m/s
+    return distance
 
-    dt = t1 - t0
-    if dt <= 0 or dt > 0.030:   # >30ms = >5m = junk
-        return None
-
-    return (dt * 343.0) / 2.0
 
 # ============================================================
 # SPEED MEASUREMENT
 # ============================================================
 
-import statistics
+def measure_speed(trigcar, echocar, trigani, echoani,delay): # delay is 900 ms
 
-def measure_speed(trig, echo, samples=6, delay=0.035):
-    """
-    Returns (speed_mps, last_distance_m).
-    Speed is positive when approaching.
-    Uses median filtering + linear regression for best accuracy.
-    """
+    caroridis=measure_distance(trigcar, echocar)
+    anioridis=measure_distance(trigani, echoani)
 
-    ds = []
-    ts = []
+    time.sleep(delay)
 
-    for _ in range(samples):
-        d = measure_distance(trig, echo)
-        if d is None:
-            return 0.0, None
+    car_distance=measure_distance(trigcar, echocar)
+    animal_distance=measure_distance(trigani, echoani)
 
-        ds.append(d)
-        ts.append(time.monotonic())
-        time.sleep(delay)
+    car_speed=(caroridis-car_distance)/delay
+    animal_speed=(anioridis-animal_distance)/delay
 
-    # -------- median smoothing --------
-    smoothed = []
-    k = 2  # median window radius
-
-    for i in range(len(ds)):
-        L = max(0, i - k)
-        R = min(len(ds), i + k + 1)
-        smoothed.append(statistics.median(ds[L:R]))
-
-    xs = [t - ts[0] for t in ts]
-    ys = smoothed
-
-    n = len(xs)
-    sumx = sum(xs)
-    sumy = sum(ys)
-    sumxy = sum(x*y for x, y in zip(xs, ys))
-    sumx2 = sum(x*x for x in xs)
-
-    denom = n * sumx2 - sumx * sumx
-    if denom == 0:
-        return 0.0, ys[-1]
-
-    slope = (n * sumxy - sumx * sumy) / denom
-
-    # slope is Δdistance / Δtime  → m/s
-    return slope, ys[-1]
+    return car_speed, animal_speed, car_distance, animal_distance
 
 
-
-animal_speed, animal_distance = measure_speed(USS1_TRIG, USS1_ECHO)
+animal_speed, animal_distance, car_speed, car_distance = measure_speed(USS1_TRIG, USS1_ECHO, USS2_TRIG, USS2_ECHO, 0.9)
 print(animal_distance, animal_speed)
-car_speed, car_distance = measure_speed(USS2_TRIG, USS2_ECHO)
 print(car_distance, car_speed)
