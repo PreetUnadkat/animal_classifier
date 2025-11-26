@@ -126,7 +126,7 @@ try:
     c_speed, a_speed, c_dist, a_dist = measure_speed_dual(
         USS2_TRIG, USS2_ECHO,  # Car Pins
         USS1_TRIG, USS1_ECHO,  # Animal Pins
-        delay=0.9
+        delay=900
     )
 
     print(f"ANIMAL: Dist={a_dist:.5f}m, Speed={a_speed:.5f} m/s")
