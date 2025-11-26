@@ -44,35 +44,38 @@ time.sleep(0.5) # Sensor settling time
 # ============================================================
 
 def measure_distance(trig, echo):
-    """
-    Return distance in meters. 
-    Returns None if sensor times out or fails.
-    """
-    # Trigger pulse
+    # settle line
+    GPIO.output(trig, False)
+    time.sleep(0.000002)
+
+    # trigger pulse
     GPIO.output(trig, True)
-    time.sleep(0.00001) # 10us pulse
+    time.sleep(0.00001)
     GPIO.output(trig, False)
 
-    start_timeout = time.monotonic()
-    
-    # Wait for Echo Rise
+    start = time.monotonic()
+    timeout = start + ECHO_TIMEOUT
+
+    # wait for echo HIGH
     while GPIO.input(echo) == 0:
-        if time.monotonic() - start_timeout > ECHO_TIMEOUT:
+        if time.monotonic() > timeout:
             return None
 
     t0 = time.monotonic()
-    
-    # Wait for Echo Fall
+    timeout2 = t0 + ECHO_TIMEOUT
+
+    # wait for echo LOW
     while GPIO.input(echo) == 1:
-        if time.monotonic() - t0 > ECHO_TIMEOUT:
+        if time.monotonic() > timeout2:
             return None
 
     t1 = time.monotonic()
 
-    # Calculate distance
-    duration = t1 - t0
-    distance = (duration * 343.0) / 2.0
-    return distance
+    dt = t1 - t0
+    if dt <= 0 or dt > 0.03:   # >5 m → invalid
+        return None
+
+    return (dt * 343.0) / 2.0
 
 def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay=2):
     """
