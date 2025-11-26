@@ -73,7 +73,7 @@ def measure_distance(trig, echo):
     distance = (duration * 343.0) / 2.0
     return distance
 
-def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
+def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay=2):
     """
     Measures speed for both Car and Animal simultaneously.
     Returns: (car_speed, animal_speed, car_dist, animal_dist)
@@ -84,7 +84,7 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
     time_1 = time.monotonic()
     GPIO.output(LED_PIN, True)
     GPIO.output(BUZZER_PIN, True)
-    time.sleep(delay)
+    time.sleep(1.2)
     GPIO.output(LED_PIN, False)
     GPIO.output(BUZZER_PIN, False)
 
@@ -105,7 +105,7 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
         car_speed = (dist_car_1 - dist_car_2) / actual_dt
         final_car_dist = dist_car_2
     else:
-        car_speed = 0.00001
+        car_speed = 0.0
         final_car_dist = dist_car_2 if dist_car_2 is not None else -1
 
     # --- CALCULATE ANIMAL SPEED ---
@@ -113,12 +113,9 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
         ani_speed = (dist_ani_1 - dist_ani_2) / actual_dt
         final_ani_dist = dist_ani_2
     else:
-        ani_speed = 0.00001
+        ani_speed = 0.0
         final_ani_dist = dist_ani_2 if dist_ani_2 is not None else -1
-    # if ani_speed==0:
-        # ani_speed=0.00001
-    # if car_distance==0:
-        # car_distance=0.00001
+
     print(dist_ani_1,'animal distance 1')
     print(dist_ani_2,'animal distance 2')
     print(dist_car_1,'car distance 1')
@@ -128,7 +125,6 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
     print(actual_dt,'actual dt')
     print(car_speed,'car speed')
     print(ani_speed,'animal speed')
-    # print(dist_ani_1, dist_ani_2, actual_dt,time_1,time_2)
     return car_speed, ani_speed, final_car_dist, final_ani_dist
 
     """
