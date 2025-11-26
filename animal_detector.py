@@ -213,64 +213,67 @@ def interpret_results(output_probs, threshold=CONFIDENCE_THRESHOLD):
 def main():
     print('Real final')
     """Main execution pipeline."""
+
     print("=" * 50)
     print("Raspberry Pi Animal Classifier")
     print("=" * 50)
-    
+
     try:
         # 1. Setup and verification
         print("\n[1/5] Verifying setup...")
         verify_model_exists()
         camera_cmd = find_camera_command()
-        
+
         # 2. Load model
         print("\n[2/5] Loading model...")
         interpreter, input_details, output_details, img_size, input_dtype = load_model()
-        
+
         # 3. Capture photo
         print("\n[3/5] Capturing image...")
         img_path = capture_photo(camera_cmd)
-        
+
         # 4. Preprocess
         print("\n[4/5] Preprocessing image...")
         img_array = preprocess_image(img_path, img_size, input_dtype)
         print(f"✓ Preprocessed shape: {img_array.shape}")
-        
+
         # 5. Run inference
         print("\n[5/5] Running inference...")
         output_probs, inference_time = run_inference(
             interpreter, input_details, output_details, img_array
         )
-        
+
         # Interpret results
         print(f"\nRaw output: {output_probs}")
         results = interpret_results(output_probs)
-        
+
         # Display results
         print("\n" + "=" * 50)
         print("RESULTS")
         print("=" * 50)
-        print(f"Animal probability:    {results['animal_probability']:.4f}")
+        print(f"Animal probability: {results['animal_probability']:.4f}")
         print(f"No-animal probability: {results['no_animal_probability']:.4f}")
-        print(f"Confidence:            {results['confidence']:.4f}")
-        print(f"Inference time:        {inference_time:.1f}ms")
+        print(f"Confidence: {results['confidence']:.4f}")
+        print(f"Inference time: {inference_time:.1f}ms")
         print()
-        
-        if results['is_animal']:
-            print("NO ANIMAL DETECTED!")
-        else:
+
+        # Final animal/no-animal message (corrected)
+        if results["is_animal"]:
             print("ANIMAL DETECTED")
-        
+            print("animal")      # machine-readable token
+        else:
+            print("NO ANIMAL DETECTED")
+            print("no_animal")   # machine-readable token
+
         print("=" * 50)
-        
         return 0
-        
+
     except KeyboardInterrupt:
-        print("\n\n  Interrupted by user")
+        print("\n\nInterrupted by user")
         return 130
-    
+
     except Exception as e:
-        print(f"\n\n ERROR: {e}", file=sys.stderr)
+        print(f"\n\nERROR: {e}", file=sys.stderr)
         return 1
 
 
