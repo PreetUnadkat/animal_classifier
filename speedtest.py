@@ -73,7 +73,7 @@ def measure_distance(trig, echo):
 # SPEED MEASUREMENT
 # ============================================================
 
-def measure_speed(trig, echo, samples=3, delay=0.15):
+def measure_speed(trig, echo, samples=10, delay=0.05):
     """
     Returns speed in m/s based on multiple distance samples.
     Returns (speed, last_distance).
