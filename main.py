@@ -76,7 +76,7 @@ def measure_distance(trig, echo):
 # SPEED MEASUREMENT
 # ============================================================
 
-def measure_speed(trig, echo, samples=3, delay=0.15):
+def measure_speed(trig, echo, samples=3, delay=0.15): # delay is 150 ms 
     """
     Returns speed in m/s based on multiple distance samples.
     Returns (speed, last_distance).
@@ -165,7 +165,7 @@ try:
         # ===================== ANIMAL (USS1) =====================
         animal_speed, animal_distance = measure_speed(USS1_TRIG, USS1_ECHO)
 
-        if animal_speed <= 0:
+        if animal_speed < 0:
             print("There is animal close by but its going farther away.")
             time.sleep(0.5)
             continue
