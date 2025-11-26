@@ -228,7 +228,8 @@ try:
 
         # ===================== CAR (USS2) =====================
         # car_speed, car_distance = measure_speed(USS2_TRIG, USS2_ECHO)
-
+        if car_speed==0:
+            car_speed=0.00001
         time_car = car_distance / car_speed
         print(
             f"Car: distance={car_distance:.2f} m, "
