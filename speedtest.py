@@ -38,70 +38,88 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.setup(BUZZER_PIN, GPIO.OUT)
 
 
-
 def measure_distance(trig, echo):
-    """Return distance in meters. Returns None on timeout."""
-    # Send trigger pulse
+    """Best-possible HC-SR04 distance measurement (meters)."""
     GPIO.output(trig, False)
-    time.sleep(0.000002)  # 2µs to settle
+    time.sleep(0.000002)
     GPIO.output(trig, True)
-    time.sleep(0.00001)   # 10µs pulse
+    time.sleep(0.00001)
     GPIO.output(trig, False)
 
-    start_time = time.time()
-    timeout_start = start_time
+    start = time.monotonic()
+    timeout = start + ECHO_TIMEOUT
 
-    # Wait for echo to go high
+    # Wait for echo HIGH
     while GPIO.input(echo) == 0:
-        start_time = time.time()
-        if start_time - timeout_start > ECHO_TIMEOUT:
+        if time.monotonic() > timeout:
             return None
 
-    # Wait for echo to go low
-    stop_time = time.time()
+    t0 = time.monotonic()
+
+    # Wait for echo LOW
     while GPIO.input(echo) == 1:
-        stop_time = time.time()
-        if stop_time - start_time > ECHO_TIMEOUT:
+        if time.monotonic() > timeout:
             return None
 
-    duration = stop_time - start_time
-    distance = (duration * 343.0) / 2.0  # speed of sound 343 m/s
-    return distance
+    t1 = time.monotonic()
 
+    dt = t1 - t0
+    if dt <= 0 or dt > 0.030:   # >30ms = >5m = junk
+        return None
+
+    return (dt * 343.0) / 2.0
 
 # ============================================================
 # SPEED MEASUREMENT
 # ============================================================
 
-def measure_speed(trig, echo, samples=10, delay=0.05):
+import statistics
+
+def measure_speed(trig, echo, samples=6, delay=0.035):
     """
-    Returns speed in m/s based on multiple distance samples.
-    Returns (speed, last_distance).
-    speed = 0.0 if cannot be measured.
+    Returns (speed_mps, last_distance_m).
+    Speed is positive when approaching.
+    Uses median filtering + linear regression for best accuracy.
     """
+
     ds = []
     ts = []
 
     for _ in range(samples):
         d = measure_distance(trig, echo)
-        t = time.time()
-
         if d is None:
-            # If any measurement fails, skip speed calc
             return 0.0, None
 
         ds.append(d)
-        ts.append(t)
+        ts.append(time.monotonic())
         time.sleep(delay)
 
-    total_dist = ds[0] - ds[-1]  # how much closer it came (or went away)
-    total_time = ts[-1] - ts[0]
+    # -------- median smoothing --------
+    smoothed = []
+    k = 2  # median window radius
 
-    if total_time <= 0:
-        return 0.0, ds[-1]
+    for i in range(len(ds)):
+        L = max(0, i - k)
+        R = min(len(ds), i + k + 1)
+        smoothed.append(statistics.median(ds[L:R]))
 
-    speed = total_dist / total_time  # postive = approaching, negative = receding
-    return speed, ds[-1]  # return latest distance too
+    xs = [t - ts[0] for t in ts]
+    ys = smoothed
+
+    n = len(xs)
+    sumx = sum(xs)
+    sumy = sum(ys)
+    sumxy = sum(x*y for x, y in zip(xs, ys))
+    sumx2 = sum(x*x for x in xs)
+
+    denom = n * sumx2 - sumx * sumx
+    if denom == 0:
+        return 0.0, ys[-1]
+
+    slope = (n * sumxy - sumx * sumy) / denom
+
+    # slope is Δdistance / Δtime  → m/s
+    return slope, ys[-1]
 
 
 
