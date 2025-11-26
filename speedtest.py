@@ -38,35 +38,37 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.setup(BUZZER_PIN, GPIO.OUT)
 
 
-
 def measure_distance(trig, echo):
     """Return distance in meters. Returns None on timeout."""
-    # Send trigger pulse
+    # Trigger pulse
     GPIO.output(trig, False)
-    time.sleep(0.000002)  # 2µs to settle
+    time.sleep(0.000002)
     GPIO.output(trig, True)
-    time.sleep(0.00001)   # 10µs pulse
+    time.sleep(0.00001)
     GPIO.output(trig, False)
 
-    start_time = time.time()
-    timeout_start = start_time
+    start = time.monotonic()
+    timeout = start + ECHO_TIMEOUT
 
-    # Wait for echo to go high
+    # Wait for echo HIGH
     while GPIO.input(echo) == 0:
-        start_time = time.time()
-        if start_time - timeout_start > ECHO_TIMEOUT:
+        if time.monotonic() > timeout:
             return None
 
-    # Wait for echo to go low
-    stop_time = time.time()
+    t0 = time.monotonic()
+
+    # Wait for echo LOW
     while GPIO.input(echo) == 1:
-        stop_time = time.time()
-        if stop_time - start_time > ECHO_TIMEOUT:
+        if time.monotonic() > timeout:
             return None
 
-    duration = stop_time - start_time
-    distance = (duration * 343.0) / 2.0  # speed of sound 343 m/s
-    return distance
+    t1 = time.monotonic()
+
+    dt = t1 - t0
+    if dt <= 0:
+        return None
+
+    return (dt * 343.0) / 2.0
 
 
 # ============================================================
