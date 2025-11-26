@@ -83,10 +83,10 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay=2):
     dist_ani_1 = measure_distance(trig_ani, echo_ani)
     time_1 = time.monotonic()
     GPIO.output(LED_PIN, True)
-    GPIO.output(BUZZER_PIN, True)
+    # GPIO.output(BUZZER_PIN, True)
     time.sleep(1.2)
     GPIO.output(LED_PIN, False)
-    GPIO.output(BUZZER_PIN, False)
+    # GPIO.output(BUZZER_PIN, False)
 
     # Wait for the interval
     # time.sleep(delay)
