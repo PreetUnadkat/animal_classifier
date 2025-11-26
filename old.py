@@ -19,7 +19,7 @@ LED_PIN = 5
 BUZZER_PIN = 6
 
 # If times differ by < 1 sec → danger
-CRITICAL_TIME_DIFF = 1.0
+CRITICAL_TIME_DIFF = 2
 
 # Max time to wait for echo (seconds) to avoid infinite loops
 ECHO_TIMEOUT = 0.03  # ~30ms → ~5m range

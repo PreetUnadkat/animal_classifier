@@ -254,7 +254,7 @@ def main():
         print(f"Animal probability: {results['animal_probability']:.4f}")
         print(f"No-animal probability: {results['no_animal_probability']:.4f}")
         print(f"Confidence: {results['confidence']:.4f}")
-        print(f"Inference time: {inference_time:.1f}ms")
+        print(f"Inference time: {inference_time:.2f}ms")
         print()
 
         # Final animal/no-animal message (corrected)
