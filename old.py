@@ -187,6 +187,8 @@ MOTION_THRESHOLD = 0.005   # 0.5 cm movement triggers detection
 
 try:
     while True:
+        GPIO.output(LED_PIN, False)
+        GPIO.output(BUZZER_PIN, False)
         # Step 1: detect motion via USS1
         d1 = measure_distance(USS1_TRIG, USS1_ECHO)
 
