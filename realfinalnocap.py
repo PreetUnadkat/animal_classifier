@@ -165,7 +165,7 @@ try:
             # time.sleep(0.5)
             # continue
 
-        car_speed, animal_speed, car_distance, animal_distance = measure_speed_dual(USS2_TRIG, USS2_ECHO,USS1_TRIG,USS1_ECHO,0.9)
+        car_speed, animal_speed, car_distance, animal_distance = measure_speed(USS2_TRIG, USS2_ECHO,USS1_TRIG,USS1_ECHO,0.9)
         
         time_animal = (animal_distance - 0.06) / animal_speed
         print(
