@@ -105,7 +105,7 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
         car_speed = (dist_car_1 - dist_car_2) / actual_dt
         final_car_dist = dist_car_2
     else:
-        car_speed = 0.0
+        car_speed = 0.00001
         final_car_dist = dist_car_2 if dist_car_2 is not None else -1
 
     # --- CALCULATE ANIMAL SPEED ---
@@ -113,12 +113,12 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
         ani_speed = (dist_ani_1 - dist_ani_2) / actual_dt
         final_ani_dist = dist_ani_2
     else:
-        ani_speed = 0.0
+        ani_speed = 0.00001
         final_ani_dist = dist_ani_2 if dist_ani_2 is not None else -1
-    if ani_speed==0:
-        ani_speed=0.00001
-    if car_distance==0:
-        car_distance=0.00001
+    # if ani_speed==0:
+        # ani_speed=0.00001
+    # if car_distance==0:
+        # car_distance=0.00001
     print(dist_ani_1,'animal distance 1')
     print(dist_ani_2,'animal distance 2')
     print(dist_car_1,'car distance 1')
