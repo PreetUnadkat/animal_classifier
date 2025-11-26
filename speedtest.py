@@ -85,7 +85,7 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay=0.9):
     time_1 = time.monotonic()
     GPIO.output(LED_PIN, True)
     GPIO.output(BUZZER_PIN, True)
-    time.sleep(1.0)
+    time.sleep(2.0)
     GPIO.output(LED_PIN, False)
     GPIO.output(BUZZER_PIN, False)
 
