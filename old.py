@@ -115,8 +115,16 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
     else:
         ani_speed = 0.0
         final_ani_dist = dist_ani_2 if dist_ani_2 is not None else -1
-
-    print(dist_ani_1, dist_ani_2, actual_dt,time_1,time_2)
+    print(dist_ani_1,'animal distance 1')
+    print(dist_ani_2,'animal distance 2')
+    print(dist_car_1,'car distance 1')
+    print(dist_car_2,'car distance 2')
+    print(time_1,'time1')
+    print(time_2,'time2')
+    print(actual_dt,'actual dt')
+    print(car_speed,'car speed')
+    print(ani_speed,'animal speed')
+    # print(dist_ani_1, dist_ani_2, actual_dt,time_1,time_2)
     return car_speed, ani_speed, final_car_dist, final_ani_dist
 
     """
@@ -154,12 +162,19 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
 # ============================================================
 
 def alert():
-    print("🚨 RED ALERT: Possible crash!")
-    GPIO.output(LED_PIN, True)
+    print("RED ALERT: Possible crash!")
+    # GPIO.output(LED_PIN, True)
     GPIO.output(BUZZER_PIN, True)
     time.sleep(1.0)
-    GPIO.output(LED_PIN, False)
+    # GPIO.output(LED_PIN, False)
     GPIO.output(BUZZER_PIN, False)
+# def oranalert():
+#     print("ORANGE")
+#     GPIO.output(LED_PIN, True)
+#     # GPIO.output(BUZZER_PIN, True)
+#     time.sleep(1.0)
+#     GPIO.output(LED_PIN, False)
+#     # GPIO.output(BUZZER_PIN, False)
 
 
 # ============================================================
