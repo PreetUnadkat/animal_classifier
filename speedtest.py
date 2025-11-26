@@ -83,9 +83,14 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay=0.9):
     dist_car_1 = measure_distance(trig_car, echo_car)
     dist_ani_1 = measure_distance(trig_ani, echo_ani)
     time_1 = time.monotonic()
+    GPIO.output(LED_PIN, True)
+    GPIO.output(BUZZER_PIN, True)
+    time.sleep(1.0)
+    GPIO.output(LED_PIN, False)
+    GPIO.output(BUZZER_PIN, False)
 
     # Wait for the interval
-    time.sleep(delay)
+    # time.sleep(delay)
 
     # 2. Take Final Measurements
     dist_car_2 = measure_distance(trig_car, echo_car)
@@ -126,8 +131,9 @@ try:
     c_speed, a_speed, c_dist, a_dist = measure_speed_dual(
         USS2_TRIG, USS2_ECHO,  # Car Pins
         USS1_TRIG, USS1_ECHO,  # Animal Pins
-        delay=900
+        delay=3
     )
+    
 
     print(f"ANIMAL: Dist={a_dist:.5f}m, Speed={a_speed:.5f} m/s")
     print(f"CAR   : Dist={c_dist:.5f}m, Speed={c_speed:.5f} m/s")
