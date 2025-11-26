@@ -129,8 +129,8 @@ try:
         delay=0.9
     )
 
-    print(f"ANIMAL: Dist={a_dist:.2f}m, Speed={a_speed:.2f} m/s")
-    print(f"CAR   : Dist={c_dist:.2f}m, Speed={c_speed:.2f} m/s")
+    print(f"ANIMAL: Dist={a_dist}m, Speed={a_speed} m/s")
+    print(f"CAR   : Dist={c_dist}m, Speed={c_speed} m/s")
 
 except KeyboardInterrupt:
     print("Stopped by user")
