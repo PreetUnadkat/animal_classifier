@@ -161,7 +161,7 @@ try:
         # Step 2: run animal detector
         try:
             result = subprocess.check_output(
-                ["python3", "animal_detector.py"]
+                ["python3", "ani_det.py"]
             ).decode().strip().lower()
         except Exception as e:
             print(f"Error running animal_detector.py: {e}")
