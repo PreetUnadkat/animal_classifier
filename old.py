@@ -115,6 +115,10 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay):
     else:
         ani_speed = 0.0
         final_ani_dist = dist_ani_2 if dist_ani_2 is not None else -1
+    if ani_speed==0:
+        ani_speed=0.00001
+    if car_distance==0:
+        car_distance=0.00001
     print(dist_ani_1,'animal distance 1')
     print(dist_ani_2,'animal distance 2')
     print(dist_car_1,'car distance 1')
@@ -234,6 +238,7 @@ try:
             # continue
 
         car_speed, animal_speed, car_distance, animal_distance = measure_speed_dual(USS2_TRIG, USS2_ECHO,USS1_TRIG,USS1_ECHO,0.9)
+        
         time_animal = (animal_distance - 0.06) / animal_speed
         print(
             f"Animal: distance={animal_distance:.2f} m, "
