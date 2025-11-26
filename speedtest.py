@@ -98,7 +98,7 @@ def measure_speed_dual(trig_car, echo_car, trig_ani, echo_ani, delay=2):
     time_2 = time.monotonic()
 
     # Calculate actual time delta (more accurate than relying on sleep)
-    actual_dt = time_2 - time_1
+    actual_dt = (time_2 - time_1) * 1.1
 
     # --- CALCULATE CAR SPEED ---
     if dist_car_1 is not None and dist_car_2 is not None:
