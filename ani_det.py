@@ -25,25 +25,28 @@ CONFIDENCE_THRESHOLD = 0.5
 CAMERA_COMMANDS = ["rpicam-still", "libcamera-still", "raspistill"]
 
 
-# HELPER FUNCTION
+# ==================== HELPER FUNCTIONS ====================
 def find_camera_command():
-    """Detects camera command """
+    """Detects which camera command is available on the system."""
     for cmd in CAMERA_COMMANDS:
         result = os.system(f"which {cmd} > /dev/null 2>&1")
         if result == 0:
             print(f"✓ Found camera command: {cmd}")
             return cmd
-    raise RuntimeError("camera not found.")
+    raise RuntimeError(
+        "No camera command found. Install libcamera or enable legacy camera.\n"
+        "Try: sudo apt install libcamera-apps"
+    )
 
 
-# def verify_model_exists():
-#     """Checks if TFLite model file exists."""
-#     if not Path(MODEL_PATH).is_file():
-#         raise FileNotFoundError(
-#             f"Model file '{MODEL_PATH}' not found in current directory.\n"
-#             f"Current directory: {os.getcwd()}"
-#         )
-#     print(f"✓ Model found: {MODEL_PATH}")
+def verify_model_exists():
+    """Checks if the TFLite model file exists."""
+    if not Path(MODEL_PATH).is_file():
+        raise FileNotFoundError(
+            f"Model file '{MODEL_PATH}' not found in current directory.\n"
+            f"Current directory: {os.getcwd()}"
+        )
+    print(f"✓ Model found: {MODEL_PATH}")
 
 
 # ==================== MODEL SETUP ====================
@@ -60,10 +63,10 @@ def load_model():
         input_shape = input_details['shape']
         input_dtype = input_details['dtype']
         
-        print(f"Model loaded successfully")
-        print(f"Input shape: {input_shape}")
-        print(f"Input dtype: {input_dtype}")
-        print(f"Output shape: {output_details['shape']}")
+        print(f"✓ Model loaded successfully")
+        print(f"  Input shape: {input_shape}")
+        print(f"  Input dtype: {input_dtype}")
+        print(f"  Output shape: {output_details['shape']}")
         
         # Determine image size (assuming NHWC format: batch, height, width, channels)
         if len(input_shape) == 4:
@@ -71,14 +74,14 @@ def load_model():
             img_width = input_shape[2]
         else:
             raise ValueError(f"Unexpected input shape: {input_shape}")
-        wE2
+        
         return interpreter, input_details, output_details, (img_width, img_height), input_dtype
         
     except Exception as e:
         raise RuntimeError(f"Failed to load model: {e}")
 
 
-# CAMERA FUNCTIONS
+# ==================== CAMERA FUNCTIONS ====================
 def capture_photo(camera_cmd, filename=CAPTURE_FILENAME):
     """
     Captures a photo using the detected camera command.
@@ -88,7 +91,7 @@ def capture_photo(camera_cmd, filename=CAPTURE_FILENAME):
     if os.path.exists(filename):
         os.remove(filename)
     
-    print("Capturing photo..")
+    print("📸 Capturing photo...")
     
     # Build command based on camera type
     if camera_cmd in ["rpicam-still", "libcamera-still"]:
@@ -121,7 +124,7 @@ def capture_photo(camera_cmd, filename=CAPTURE_FILENAME):
     return filename
 
 
-# PREPROCESSING 
+# ==================== PREPROCESSING ====================
 def preprocess_image(image_path, img_size, input_dtype):
     """
     Loads, resizes, and preprocesses image for model inference.
@@ -218,7 +221,7 @@ def main():
     try:
         # 1. Setup and verification
         # print("\n[1/5] Verifying setup...")
-        # verify_model_exists()
+        verify_model_exists()
         camera_cmd = find_camera_command()
 
         # 2. Load model
