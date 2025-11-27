@@ -189,14 +189,13 @@ try:
     while True:
         GPIO.output(LED_PIN, False)
         GPIO.output(BUZZER_PIN, False)
-        # Step 1: detect motion via USS1
         d1 = measure_distance(USS1_TRIG, USS1_ECHO)
 
         motion_detected = False
         if prev_d1 is not None and d1 is not None and d1 < 0.50:
             if abs(d1 - prev_d1) > MOTION_THRESHOLD:
                 motion_detected = True
-                print(f"Motion detected near USS1 (Δ={abs(d1 - prev_d1):.2f} m). Checking for animal...")
+                print(f"Motion detected near USS1 (del={abs(d1 - prev_d1):.2f} m). Checking for animal")
 
         prev_d1 = d1
 
@@ -204,7 +203,6 @@ try:
             time.sleep(0.5) # 500 ms
             continue
 
-        # Step 2: run animal detector
         try:
             result = subprocess.check_output(
                 ["python3", "ani_det.py"]
@@ -221,7 +219,6 @@ try:
 
         print("Animal confirmed by ML detector.")
 
-        # ===================== ANIMAL (USS1) =====================
         # animal_speed, animal_distance = measure_speed(USS1_TRIG, USS1_ECHO)
 
         # if animal_speed < 0:
@@ -236,7 +233,8 @@ try:
             # continue
 
         car_speed, animal_speed, car_distance, animal_distance = measure_speed_dual(USS2_TRIG, USS2_ECHO,USS1_TRIG,USS1_ECHO,0.9)
-        
+        if animal_speed==0:
+            animal_speed=0.00001
         time_animal = (animal_distance - 0.06) / animal_speed
         print(
             f"Animal: distance={animal_distance:.2f} m, "
